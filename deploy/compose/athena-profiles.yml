@@ -1,0 +1,39 @@
+name: nexus-athena
+
+services:
+  athena.standard:
+    image: ${ATHENA_IMAGE:-phoenixvlabs/nexus-athena:latest}
+    container_name: athena.standard
+    hostname: athena-standard
+    tty: true
+    stdin_open: true
+    command: ["/bin/bash"]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - athena_lab
+
+  athena.packet-lab:
+    image: ${ATHENA_IMAGE:-phoenixvlabs/nexus-athena:latest}
+    container_name: athena.packet-lab
+    hostname: athena-packet-lab
+    tty: true
+    stdin_open: true
+    command: ["/bin/bash"]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      - athena_lab
+    profiles:
+      - packet-lab
+
+networks:
+  athena_lab:
+    driver: bridge
