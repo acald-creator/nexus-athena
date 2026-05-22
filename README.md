@@ -35,6 +35,11 @@ Athena is not responsible for:
 | `athena-packet-lab` | Wireshark, packet capture, and network analysis | Explicit `NET_ADMIN` or `NET_RAW` only when needed |
 | `athena-exploit-lab` | Metasploit and exploit simulation labs | Isolated network, explicit approval |
 
+Runtime assets:
+
+- Docker Compose profiles: `deploy/compose/athena-profiles.yml`
+- Kubernetes base and overlays: `deploy/kubernetes/base`, `deploy/kubernetes/overlays/local`, `deploy/kubernetes/overlays/prod`
+
 ## Build Images
 
 The repository currently keeps separate Dockerfiles:
@@ -56,6 +61,34 @@ docker buildx build \
     --build-arg VERSION="$VERSION" \
     --build-arg BUILD_TIMESTAMP="$BUILD_TIMESTAMP" \
     .
+```
+
+## Runtime Profiles
+
+### Docker Compose
+
+```sh
+# Standard profile (default)
+./scripts/run-athena-profile.sh standard
+
+# Packet capture lab profile (adds NET_ADMIN and NET_RAW)
+./scripts/run-athena-profile.sh packet-lab
+
+# Tear down
+./scripts/run-athena-profile.sh down
+```
+
+### Kubernetes
+
+```sh
+# Preview local overlay
+kubectl kustomize deploy/kubernetes/overlays/local
+
+# Apply local overlay
+kubectl apply -k deploy/kubernetes/overlays/local
+
+# Optional: scale up packet-lab only when explicitly needed
+kubectl -n nexus-athena scale deploy/athena-packet-lab --replicas=1
 ```
 
 ## Supply Chain

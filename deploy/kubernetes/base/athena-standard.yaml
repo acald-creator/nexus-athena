@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: athena-standard
+  namespace: nexus-athena
+  labels:
+    app.kubernetes.io/name: nexus-athena
+    app.kubernetes.io/component: standard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nexus-athena
+      app.kubernetes.io/component: standard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nexus-athena
+        app.kubernetes.io/component: standard
+    spec:
+      containers:
+        - name: athena
+          image: phoenixvlabs/nexus-athena:latest
+          command: ["/bin/bash", "-lc", "sleep infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi

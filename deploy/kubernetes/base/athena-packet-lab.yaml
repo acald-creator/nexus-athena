@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: athena-packet-lab
+  namespace: nexus-athena
+  labels:
+    app.kubernetes.io/name: nexus-athena
+    app.kubernetes.io/component: packet-lab
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nexus-athena
+      app.kubernetes.io/component: packet-lab
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nexus-athena
+        app.kubernetes.io/component: packet-lab
+    spec:
+      containers:
+        - name: athena
+          image: phoenixvlabs/nexus-athena:latest
+          command: ["/bin/bash", "-lc", "sleep infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_ADMIN", "NET_RAW"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
