@@ -1,6 +1,5 @@
 FROM kalilinux/kali-bleeding-edge:arm64
 
-ARG TERRAFORM_VERSION=1.2.7
 ARG RADARE2_REF=5.9.8
 ARG VERSION
 ENV VERSION $VERSION
@@ -44,11 +43,3 @@ RUN git clone --branch "${RADARE2_REF}" --depth 1 https://github.com/radareorg/r
     sh radare2/sys/install.sh 2> /dev/null
 
 RUN rm -rf radare2 2> /dev/null
-
-RUN wget -O terraform-arm64.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_arm64.zip && \
-    unzip terraform-arm64.zip && \
-    mv terraform /usr/local/bin && \
-    touch ~/.bashrc && \
-    terraform -install-autocomplete
-
-RUN rm terraform-arm64.zip 2> /dev/null

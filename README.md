@@ -6,7 +6,7 @@ Athena should generate repeatable lab traffic, packet captures, and adversarial 
 
 ## Current Status
 
-The current image is based on Kali Linux and includes tools such as Nmap, Wireshark, Metasploit Framework, radare2, and Terraform. The architecture direction is to keep Athena as an isolated lab workload while moving privileged capabilities into explicit runtime profiles.
+The current image is based on Kali Linux and includes tools such as Nmap, Wireshark, Metasploit Framework, and radare2. Terraform and broader infrastructure tooling should live in Workbench by default. The architecture direction is to keep Athena as an isolated lab workload while moving privileged capabilities into explicit runtime profiles.
 
 See [architecture.md](architecture.md) for the proposed architecture.
 

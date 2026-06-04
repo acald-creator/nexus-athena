@@ -12,8 +12,7 @@ graph TD
     A --> C[Nmap and Wireshark]
     A --> D[Metasploit Framework]
     A --> E[radare2 Built From Source]
-    A --> F[Terraform Binary]
-    F --> G[Attack and Lab Automation]
+    A --> F[Attack and Lab Automation]
 ```
 
 Current characteristics:
@@ -22,8 +21,7 @@ Current characteristics:
 - Uses `kalilinux/kali-bleeding-edge` as the base image.
 - Installs offensive and analysis tools such as Nmap, Wireshark, Metasploit Framework, and radare2.
 - Builds radare2 from the upstream repository at build time.
-- Downloads a pinned Terraform version directly from HashiCorp releases.
-- Exposes SSH on port `22`.
+- Keeps Terraform out of the default image and prefers Workbench for infrastructure tooling.
 - Declares shared volumes for `/var/run`, `/var/lib/docker/volumes`, and `/nexus-bucket`.
 
 ## 2. Target Role
@@ -85,5 +83,5 @@ Milestone scope:
 - Add a documented runtime profile for Docker and Kubernetes.
 - Remove default host Docker mounts from normal operation.
 - Add labels and environment variables for lab scenario identity.
-- Pin or intentionally track versions for radare2 and Terraform.
+- Pin or intentionally track versions for radare2 and any optional tooling layers.
 - Document required Linux capabilities for packet capture labs.
