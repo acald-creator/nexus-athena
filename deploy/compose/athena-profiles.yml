@@ -34,6 +34,26 @@ services:
     profiles:
       - packet-lab
 
+  athena.exploit-lab:
+    image: ${ATHENA_IMAGE:-phoenixvlabs/nexus-athena:latest}
+    container_name: athena.exploit-lab
+    hostname: athena-exploit-lab
+    tty: true
+    stdin_open: true
+    command: ["/bin/bash"]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_PTRACE
+    networks:
+      - athena_lab
+    profiles:
+      - exploit-lab
+
 networks:
   athena_lab:
     driver: bridge

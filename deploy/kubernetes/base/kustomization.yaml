@@ -5,3 +5,7 @@ resources:
   - namespace.yaml
   - athena-standard.yaml
   - athena-packet-lab.yaml
+  - athena-exploit-lab.yaml
+  - network-policy-default-deny.yaml
+  - network-policy-lab-egress.yaml
+  - network-policy-soc-deny.yaml
