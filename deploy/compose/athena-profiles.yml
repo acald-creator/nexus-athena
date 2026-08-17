@@ -1,5 +1,4 @@
 name: nexus-athena
-
 services:
   athena.standard:
     image: ${ATHENA_IMAGE:-phoenixvlabs/nexus-athena:latest}
@@ -53,6 +52,55 @@ services:
       - athena_lab
     profiles:
       - exploit-lab
+
+  athena.agent:
+    image: ${ATHENA_IMAGE:-phoenixvlabs/nexus-athena:latest}
+    container_name: athena.agent
+    hostname: athena-agent
+    tty: true
+    stdin_open: true
+    command: ["sleep", "infinity"]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - ATHENA_TOOL_REGISTRY=/opt/athena/config/tool-registry.toml
+      - ATHENA_ALLOWLIST=/opt/athena/config/allowlist.json
+      - ATHENA_SCENARIO_LABEL=${ATHENA_SCENARIO_LABEL:-}
+    networks:
+      - athena_lab
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - agent
+
+  athena.agent-ics:
+    image: ${ATHENA_IMAGE:-phoenixvlabs/nexus-athena:latest}
+    container_name: athena.agent-ics
+    hostname: athena-agent-ics
+    tty: true
+    stdin_open: true
+    command: ["sleep", "infinity"]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - ATHENA_TOOL_REGISTRY=/opt/athena/config/tool-registry.toml
+      - ATHENA_ALLOWLIST=/opt/athena/config/allowlist.json
+      - ATHENA_SCENARIO_LABEL=${ATHENA_SCENARIO_LABEL:-}
+      - ATHENA_CAPABILITIES=ICS_WRITE,CAN_INJECT
+    networks:
+      - athena_lab
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - agent-ics
 
 networks:
   athena_lab:

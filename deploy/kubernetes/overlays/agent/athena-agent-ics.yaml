@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: athena-agent-ics
+  namespace: nexus-athena
+  labels:
+    app.kubernetes.io/name: nexus-athena
+    app.kubernetes.io/component: agent-ics
+  annotations:
+    nexus-athena/required-capabilities: "NET_RAW,ICS_WRITE,CAN_INJECT"
+    nexus-athena/profile-type: "agent-ics"
+    nexus-athena/llm-backend: "ollama"
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nexus-athena
+      app.kubernetes.io/component: agent-ics
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nexus-athena
+        app.kubernetes.io/component: agent-ics
+        nexus-athena/traffic-labeled: "true"
+    spec:
+      containers:
+        - name: athena
+          image: phoenixvlabs/nexus-athena:latest
+          command: ["sleep", "infinity"]
+          env:
+            - name: OLLAMA_HOST
+              value: "http://ollama.ai-inference.svc.cluster.local:11434"
+            - name: ATHENA_TOOL_REGISTRY
+              value: "/opt/athena/config/tool-registry.toml"
+            - name: ATHENA_ALLOWLIST
+              value: "/opt/athena/config/allowlist.json"
+            - name: ATHENA_CAPABILITIES
+              value: "ICS_WRITE,CAN_INJECT"
+            - name: ATHENA_SCENARIO_LABEL
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/component']
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_RAW"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          volumeMounts:
+            - name: athena-config
+              mountPath: /opt/athena/config
+              readOnly: true
+      volumes:
+        - name: athena-config
+          configMap:
+            name: athena-agent-config

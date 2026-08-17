@@ -1,32 +1,68 @@
 #!/usr/bin/env bash
+# run-athena-profile.sh — Start an Athena runtime profile.
+#
+# Usage:
+#   ./scripts/run-athena-profile.sh standard      # Basic red-team (default)
+#   ./scripts/run-athena-profile.sh packet-lab    # Packet capture capabilities
+#   ./scripts/run-athena-profile.sh exploit-lab   # Full exploit capabilities
+#   ./scripts/run-athena-profile.sh agent         # LLM-driven OPAR mode
+#   ./scripts/run-athena-profile.sh agent-ics     # LLM agent + ICS capabilities
+#   ./scripts/run-athena-profile.sh down          # Tear down all profiles
+#   ./scripts/run-athena-profile.sh status        # Show running containers
+
 set -euo pipefail
 
 PROFILE="${1:-standard}"
 COMPOSE_FILE="deploy/compose/athena-profiles.yml"
 ATHENA_IMAGE="${ATHENA_IMAGE:-phoenixvlabs/nexus-athena:latest}"
 
+export ATHENA_IMAGE
+
 if [[ ! -f "${COMPOSE_FILE}" ]]; then
-  echo "missing compose file: ${COMPOSE_FILE}" >&2
+  echo "Error: missing compose file: ${COMPOSE_FILE}" >&2
+  echo "Run this script from the repository root." >&2
   exit 1
 fi
 
 case "${PROFILE}" in
   standard)
-    export ATHENA_IMAGE
+    echo "Starting Athena standard profile..."
     docker compose -f "${COMPOSE_FILE}" up -d athena.standard
-    docker compose -f "${COMPOSE_FILE}" ps
     ;;
   packet-lab)
-    export ATHENA_IMAGE
+    echo "Starting Athena packet-lab profile (NET_ADMIN + NET_RAW)..."
     docker compose --profile packet-lab -f "${COMPOSE_FILE}" up -d athena.packet-lab
-    docker compose --profile packet-lab -f "${COMPOSE_FILE}" ps
+    ;;
+  exploit-lab)
+    echo "Starting Athena exploit-lab profile (NET_ADMIN + NET_RAW + SYS_PTRACE)..."
+    docker compose --profile exploit-lab -f "${COMPOSE_FILE}" up -d athena.exploit-lab
+    ;;
+  agent)
+    echo "Starting Athena agent profile (LLM OPAR mode)..."
+    echo "  OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}"
+    docker compose --profile agent -f "${COMPOSE_FILE}" up -d athena.agent
+    ;;
+  agent-ics)
+    echo "Starting Athena agent-ics profile (LLM OPAR + ICS_WRITE + CAN_INJECT)..."
+    echo "  OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}"
+    echo "  ATHENA_CAPABILITIES=ICS_WRITE,CAN_INJECT"
+    docker compose --profile agent-ics -f "${COMPOSE_FILE}" up -d athena.agent-ics
     ;;
   down)
-    export ATHENA_IMAGE
-    docker compose --profile packet-lab -f "${COMPOSE_FILE}" down
+    echo "Tearing down all Athena profiles..."
+    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics \
+      -f "${COMPOSE_FILE}" down
+    ;;
+  status)
+    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics \
+      -f "${COMPOSE_FILE}" ps
     ;;
   *)
-    echo "usage: $0 {standard|packet-lab|down}" >&2
+    echo "Usage: $0 {standard|packet-lab|exploit-lab|agent|agent-ics|down|status}" >&2
     exit 1
     ;;
 esac
+
+echo ""
+docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics \
+  -f "${COMPOSE_FILE}" ps 2>/dev/null || true

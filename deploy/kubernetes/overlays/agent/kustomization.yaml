@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: nexus-athena
+
+resources:
+  - ../../base
+  - athena-agent.yaml
+  - athena-agent-ics.yaml
+  - network-policy-llm-egress.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: athena-standard
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 0

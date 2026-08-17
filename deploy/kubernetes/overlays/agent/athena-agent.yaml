@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: athena-agent
+  namespace: nexus-athena
+  labels:
+    app.kubernetes.io/name: nexus-athena
+    app.kubernetes.io/component: agent
+  annotations:
+    nexus-athena/required-capabilities: "none"
+    nexus-athena/profile-type: "agent"
+    nexus-athena/llm-backend: "ollama"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nexus-athena
+      app.kubernetes.io/component: agent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nexus-athena
+        app.kubernetes.io/component: agent
+        nexus-athena/traffic-labeled: "true"
+    spec:
+      containers:
+        - name: athena
+          image: phoenixvlabs/nexus-athena:latest
+          command: ["sleep", "infinity"]
+          env:
+            - name: OLLAMA_HOST
+              value: "http://ollama.ai-inference.svc.cluster.local:11434"
+            - name: ATHENA_TOOL_REGISTRY
+              value: "/opt/athena/config/tool-registry.toml"
+            - name: ATHENA_ALLOWLIST
+              value: "/opt/athena/config/allowlist.json"
+            - name: ATHENA_SCENARIO_LABEL
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/component']
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          volumeMounts:
+            - name: athena-config
+              mountPath: /opt/athena/config
+              readOnly: true
+      volumes:
+        - name: athena-config
+          configMap:
+            name: athena-agent-config
