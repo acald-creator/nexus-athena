@@ -2,11 +2,18 @@
 
 Use `architecture.md` as the canonical architecture guide for this repository.
 
-Claude is especially useful for:
+## Strengths for This Repo
 
-- Threat modeling Athena runtime profiles.
-- Reviewing isolation boundaries.
+- Threat modeling Athena runtime profiles and capability escalation paths.
+- Reviewing isolation boundaries between red-team container and SOC pipeline.
 - Checking whether offensive tooling is scoped to approved lab targets.
-- Finding places where the README or Dockerfiles imply unsafe default privileges.
+- Finding places where Dockerfiles or docs imply unsafe default privileges.
+- Reviewing LLM agent safety controls (allowlist integrity, rate limiting, capability gates).
+- Validating that autonomous execution paths have human review checkpoints.
 
-Return findings with file references and avoid rewriting implementation unless explicitly asked.
+## Output Expectations
+
+- Return findings with file references.
+- Avoid rewriting implementation unless explicitly asked.
+- When reviewing agent-related changes, verify safety controls cover every autonomous action path.
+- Flag any profile that grants capabilities without documenting the justification.
