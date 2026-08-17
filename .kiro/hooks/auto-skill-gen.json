@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Auto Skill Generation",
+      "trigger": "Stop",
+      "description": "Evaluates completed sessions and generates reusable skill files for novel problem-solving approaches.",
+      "action": {
+        "type": "agent",
+        "prompt": "Before this session ends, evaluate whether the work completed qualifies for skill generation.\n\nA skill should be generated when:\n- A novel problem was solved (not a trivial edit or typo fix)\n- A repeatable approach, tool chain, or analysis pattern was used\n- The session involved debugging, security analysis, architecture decisions, or multi-step workflows\n\nIf skill generation is warranted:\n1. Identify the domain (red-team, blue-team, ics-ot, log-analysis, code-debug, architecture, deployment, supply-chain)\n2. Write a skill file to ~/.kiro/skills/<domain>-<short-descriptor>.md\n3. The skill file should contain:\n   - A front matter block with: name, description, domain tags\n   - \"When to apply\" — conditions that indicate this skill is relevant\n   - \"Approach\" — the step-by-step method used\n   - \"Key patterns\" — specific commands, code patterns, or indicators discovered\n   - \"Pitfalls\" — what didn't work or common mistakes to avoid\n   - \"References\" — files, tools, or docs that were important\n\nIf the session was trivial (single file rename, simple typo, quick question), skip skill generation entirely."
+      }
+    }
+  ]
+}
