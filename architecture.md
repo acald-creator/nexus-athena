@@ -74,7 +74,64 @@ Recommended profiles:
 | `athena-packet-lab` | Wireshark, packet capture, network analysis | Explicit network capabilities |
 | `athena-exploit-lab` | Metasploit or attack simulation labs | Isolated network, explicit approval |
 
-## 5. First Implementation Milestone
+## 5. LLM Agent Integration
+
+The `nexus-athena` container serves as the execution environment for LLM-driven adversary emulation agents implemented in `athena-agents`.
+
+### How It Works
+
+```mermaid
+graph LR
+    subgraph "nexus-athena container"
+        A[Kali Tooling] --> B[athena-modbus / athena-canbus binaries]
+        C[LLM Agent OPAR Loop] --> A
+        C --> B
+    end
+    C -->|Plan Phase| D[Local LLM Backend]
+    C -->|Ground-Truth| E[MinIO]
+    C -->|Labeled Traffic| F[Lab Network]
+```
+
+The LLM agent orchestrator (`athena-agents/orchestrator/`) runs inside or alongside the Athena container, using Kali tools and custom Rust binaries as its action primitives. The LLM backend (Ollama, vLLM, or llama.cpp) provides the planning intelligence.
+
+### Execution Modes
+
+| Mode | Description | Use case |
+| --- | --- | --- |
+| Manual | Analyst drives Athena tools directly via CLI | Traditional red-team labs, Security+ scenarios |
+| Scripted | Pre-defined scenario replay with deterministic sequencing | Regression testing, repeatable SOC validation |
+| Autonomous (LLM) | OPAR loop with LLM planning, safety controls, and ground-truth emission | Adaptive stimulation, adversary emulation, coverage gap discovery |
+
+### Requirements for LLM Agent Mode
+
+- Network access to the LLM inference endpoint (Ollama at `localhost:11434` or configured vLLM/llama.cpp URL).
+- Access to `config/tool-registry.toml` and `config/targets/` for tool and target definitions.
+- Active runtime profile with appropriate capabilities (e.g., `ICS_WRITE` for Modbus write operations).
+- Allowlist JSON accessible and SHA-256 verified before execution.
+- Labeled traffic headers (`X-Athena-Scenario`, `X-Athena-Run-ID`) injected into all outbound requests.
+
+### Skill Persistence
+
+After autonomous scenarios complete, agent skills are captured:
+
+- Development: `~/.kiro/skills/` via Kiro auto-skill-gen hook.
+- Platform: MinIO artifact store under `skills/<domain>/<descriptor>.md`.
+- Skills are loaded into the OPAR Plan phase context on subsequent runs, reducing LLM token spend on previously-solved problems.
+
+### Profile Extension for Agent Mode
+
+| Profile | Purpose | Privilege level |
+| --- | --- | --- |
+| `athena-agent` | LLM-driven autonomous emulation against approved targets | Same as `athena-standard` + network access to LLM endpoint |
+| `athena-agent-ics` | Autonomous ICS/OT testing with safe-range enforcement | `athena-agent` + `ICS_WRITE` / `CAN_INJECT` capabilities |
+
+### Cross-References
+
+- `athena-agents/` repository — full OPAR implementation, tool registry, LLM backends.
+- `core-nexus/docs/architecture/08-athena-adversary-fuzzer.md` — Athena evolution roadmap.
+- `core-nexus/docs/architecture/11-ai-native-integration-principles.md` Section 4 — LLM agent stimulation and emulation architecture.
+
+## 6. First Implementation Milestone
 
 The first revision should make Athena safer and more repeatable without removing its red-team purpose.
 
