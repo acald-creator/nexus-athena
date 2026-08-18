@@ -59,16 +59,22 @@ services:
     hostname: athena-agent
     tty: true
     stdin_open: true
-    command: ["sleep", "infinity"]
+    command: ["/usr/local/bin/athena-agent-entrypoint.sh"]
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - ATHENA_CONFIG_DIR=/opt/athena/config
       - ATHENA_TOOL_REGISTRY=/opt/athena/config/tool-registry.toml
       - ATHENA_ALLOWLIST=/opt/athena/config/allowlist.json
+      - ATHENA_TARGET=${ATHENA_TARGET:-}
       - ATHENA_SCENARIO_LABEL=${ATHENA_SCENARIO_LABEL:-}
+      - ATHENA_GT_OUTPUT=/opt/athena/output/ground-truth.jsonl
+    volumes:
+      - ${ATHENA_CONFIG_PATH:-./config}:/opt/athena/config:ro
+      - athena_output:/opt/athena/output
     networks:
       - athena_lab
     extra_hosts:
@@ -82,7 +88,7 @@ services:
     hostname: athena-agent-ics
     tty: true
     stdin_open: true
-    command: ["sleep", "infinity"]
+    command: ["/usr/local/bin/athena-agent-entrypoint.sh"]
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -91,10 +97,16 @@ services:
       - NET_RAW
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - ATHENA_CONFIG_DIR=/opt/athena/config
       - ATHENA_TOOL_REGISTRY=/opt/athena/config/tool-registry.toml
       - ATHENA_ALLOWLIST=/opt/athena/config/allowlist.json
+      - ATHENA_TARGET=${ATHENA_TARGET:-}
       - ATHENA_SCENARIO_LABEL=${ATHENA_SCENARIO_LABEL:-}
+      - ATHENA_GT_OUTPUT=/opt/athena/output/ground-truth.jsonl
       - ATHENA_CAPABILITIES=ICS_WRITE,CAN_INJECT
+    volumes:
+      - ${ATHENA_CONFIG_PATH:-./config}:/opt/athena/config:ro
+      - athena_output:/opt/athena/output
     networks:
       - athena_lab
     extra_hosts:
@@ -105,3 +117,7 @@ services:
 networks:
   athena_lab:
     driver: bridge
+
+volumes:
+  athena_output:
+    driver: local
