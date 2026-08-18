@@ -1,123 +1,154 @@
 # Nexus Athena
 
-Nexus Athena is the controlled red-team and adversary emulation environment for Underground Nexus.
+Controlled red-team and adversary emulation container for Underground Nexus. Generates labeled attack traffic against approved targets for SOC validation, detection engineering, and AI-SOC model evaluation.
 
-Athena should generate repeatable lab traffic, packet captures, and adversarial test cases for approved targets. It should not become part of the SOC control plane, and it should not receive broad host access unless a specific lab profile requires it.
+Also serves as the execution environment for [athena-agents](https://github.com/phoenixvlabs/athena-agents) — the LLM-driven OPAR (Observe/Plan/Act/Reflect) loop.
 
-## Current Status
+## Quick Start
 
-The current image is based on Kali Linux and includes tools such as Nmap, Wireshark, Metasploit Framework, and radare2. Terraform and broader infrastructure tooling should live in Workbench by default. The architecture direction is to keep Athena as an isolated lab workload while moving privileged capabilities into explicit runtime profiles.
+```bash
+# Build the image (requires ../athena-agents repo adjacent)
+./scripts/build-athena-image.sh
 
-See [architecture.md](architecture.md) for the proposed architecture.
-
-## Role in Underground Nexus
-
-Athena is responsible for:
-
-- Controlled adversary emulation.
-- Security+ and purple-team lab traffic generation.
-- Packet and event generation for Suricata, Wazuh, and AI triage validation.
-- Repeatable attack simulation against approved lab targets.
-
-Athena is not responsible for:
-
-- SOC event storage.
-- SOC dashboard hosting.
-- Analyst desktop workflows.
-- Production control-plane automation.
-- Unrestricted Docker host administration.
-
-## Recommended Profiles
-
-| Profile | Purpose | Default privilege |
-| --- | --- | --- |
-| `athena-standard` | Basic red-team commands against approved lab targets | Unprivileged or minimal capabilities |
-| `athena-packet-lab` | Wireshark, packet capture, and network analysis | Explicit `NET_ADMIN` or `NET_RAW` only when needed |
-| `athena-exploit-lab` | Metasploit and exploit simulation labs | Isolated network, explicit approval |
-
-Runtime assets:
-
-- Docker Compose profiles: `deploy/compose/athena-profiles.yml`
-- Kubernetes base and overlays: `deploy/kubernetes/base`, `deploy/kubernetes/overlays/local`, `deploy/kubernetes/overlays/prod`
-
-## Build Images
-
-The repository currently keeps separate Dockerfiles:
-
-```text
-Dockerfile
-Dockerfile.arm64
-```
-
-Example build:
-
-```sh
-VERSION=$(git log -1 --pretty=%h)
-BUILD_TIMESTAMP=$(date '+%F_%H:%M:%S')
-
-docker buildx build \
-    -t <registry>/nexus-athena:$VERSION \
-    -t <registry>/nexus-athena:latest \
-    --build-arg VERSION="$VERSION" \
-    --build-arg BUILD_TIMESTAMP="$BUILD_TIMESTAMP" \
-    .
-```
-
-## Runtime Profiles
-
-### Docker Compose
-
-```sh
-# Standard profile (default)
+# Run manual red-team (standard profile)
 ./scripts/run-athena-profile.sh standard
 
-# Packet capture lab profile (adds NET_ADMIN and NET_RAW)
-./scripts/run-athena-profile.sh packet-lab
+# Run LLM agent against a target
+./scripts/run-athena-profile.sh agent juice-shop
+
+# Run ICS agent with safe-range enforcement
+./scripts/run-athena-profile.sh agent-ics openplc
+
+# Check status
+./scripts/run-athena-profile.sh status
 
 # Tear down
 ./scripts/run-athena-profile.sh down
 ```
 
+## Runtime Profiles
+
+| Profile | Command | Capabilities | Purpose |
+|---------|---------|-------------|---------|
+| `standard` | `/bin/bash` | Unprivileged | Manual red-team commands |
+| `packet-lab` | `/bin/bash` | NET_ADMIN, NET_RAW | Packet capture, Wireshark |
+| `exploit-lab` | `/bin/bash` | NET_ADMIN, NET_RAW, SYS_PTRACE | Metasploit, exploit dev |
+| `agent` | OPAR entrypoint | Network to LLM | LLM-driven autonomous emulation |
+| `agent-ics` | OPAR entrypoint | NET_RAW + ICS_WRITE, CAN_INJECT | Autonomous ICS/OT testing |
+
+## Architecture
+
+```mermaid
+graph LR
+    subgraph "nexus-athena container"
+        EP[Entrypoint] --> OPAR[OPAR Loop]
+        OPAR --> Tools[Kali Tools + Rust Binaries]
+    end
+    OPAR -->|Plans| LLM[Ollama LLM]
+    Tools -->|Labeled Traffic| Net[Lab Network]
+    OPAR -->|Ground-Truth JSONL| Output[/opt/athena/output/]
+    Config[/opt/athena/config/] -->|Read-only| OPAR
+```
+
+See [architecture.md](architecture.md) for the full design including LLM agent integration (Section 5).
+
+## Build
+
+The unified multi-stage Dockerfile handles both architectures (amd64/arm64) and includes:
+
+- **rust-builder** — compiles Rust tool crates from `athena-agents/crates/`
+- **python-builder** — installs the Python OPAR orchestrator
+- **athena-core** — Kali base + recon tools + agent runtime (recommended)
+- **athena-full** — extends core with Metasploit, Wireshark, radare2
+
+```bash
+# Build athena-core (fast, ~1.5GB)
+./scripts/build-athena-image.sh
+
+# Build athena-full (slower, includes Metasploit + radare2)
+./scripts/build-athena-image.sh full
+
+# Custom image tag
+IMAGE_TAG=myregistry/athena:dev ./scripts/build-athena-image.sh
+```
+
+The build script creates a temp context merging this repo + `athena-agents` (default: `../athena-agents`).
+
+## Agent Configuration
+
+The `config/` directory is mounted read-only into agent containers at `/opt/athena/config`:
+
+```
+config/
+├── tool-registry.toml      # Available tools with capability gates
+├── allowlist.json           # Approved targets (SHA-256 verified)
+├── allowlist.sha256         # Integrity hash
+├── llm.toml                # LLM backend settings (Ollama/vLLM)
+└── targets/
+    ├── juice-shop.toml     # Web app pentest scenario
+    └── openplc.toml        # ICS Modbus with safe ranges
+```
+
+See [config/README.md](config/README.md) for details.
+
+## Safety Controls
+
+All agent execution enforces:
+
+- **Allowlist verification** — SHA-256 hash checked before every cycle
+- **Capability gates** — tools declare required caps, profiles grant them
+- **Rate limiting** — per-target token-bucket (configurable in target TOML)
+- **Safe-range enforcement** — ICS write operations validated against min/max before transmission
+- **Traffic labeling** — `X-Athena-Scenario` + `X-Athena-Run-ID` headers on all outbound requests
+- **Human review** — `needs_review` flag halts execution for analyst approval
+
+## Deploy
+
+### Docker Compose
+
+```bash
+# All profiles available via the launcher script
+./scripts/run-athena-profile.sh {standard|packet-lab|exploit-lab|agent|agent-ics} [target]
+```
+
+Compose file: `deploy/compose/athena-profiles.yml`
+
 ### Kubernetes
 
-```sh
-# Preview local overlay
-kubectl kustomize deploy/kubernetes/overlays/local
-
-# Apply local overlay
+```bash
+# Standard profiles
 kubectl apply -k deploy/kubernetes/overlays/local
 
-# Optional: scale up packet-lab only when explicitly needed
-kubectl -n nexus-athena scale deploy/athena-packet-lab --replicas=1
+# Agent profile (with LLM egress NetworkPolicy)
+kubectl apply -k deploy/kubernetes/overlays/agent
 ```
+
+### Validation
+
+```bash
+# Verify all profiles start correctly and capabilities are enforced
+ATHENA_IMAGE=phoenixvlabs/nexus-athena:latest ./scripts/validate-athena-profiles.sh
+```
+
+## Cross-Repo Dependencies
+
+| Repository | Relationship |
+|------------|-------------|
+| `athena-agents` | OPAR orchestrator code (Python + Rust) — required for agent builds |
+| `core-nexus` | Architecture hub — this repo must stay aligned |
+| `nexus-webtop-soc` | SOC baseline that receives Athena's labeled traffic |
 
 ## Supply Chain
 
-This repository includes:
-
-- `cosign.pub`
-- `athena0-latest.spdx`
-
-Historical Cosign, Syft, and registry-specific examples should move into dedicated supply-chain documentation if they need to be preserved. The README should stay focused on the repo purpose, build path, runtime profiles, and architecture direction.
+- `cosign.pub` — public key for image signature verification
 
 ## AI Collaboration
 
-AI assistants should use these entrypoints:
-
-- [AGENTS.md](AGENTS.md) for Codex-style coding agents.
-- [CLAUDE.md](CLAUDE.md) for architecture critique and threat modeling.
-- [GEMINI.md](GEMINI.md) for research and platform comparison.
-- [architecture.md](architecture.md) as the source of truth for the proposed Athena role.
-
-## Local-Only and Deprecated Direction
-
-| Item | Status | Direction |
-| --- | --- | --- |
-| Broad Docker socket or host Docker mounts | Deprecated default | Disable by default; enable only for explicit lab profiles. |
-| Exposed SSH | Deprecated default | Prefer `docker exec`, Kubernetes exec, or controlled terminal access. |
-| Moving upstream source builds | Review required | Pin versions where repeatability matters. |
-| Terraform inside Athena | Optional | Prefer Workbench for infrastructure tooling unless a red-team lab requires Terraform. |
+- [AGENTS.md](AGENTS.md) — Agent coding instructions
+- [CLAUDE.md](CLAUDE.md) — Architecture critique and security review
+- [GEMINI.md](GEMINI.md) — Research and tooling comparison
+- [architecture.md](architecture.md) — Canonical architecture guide
 
 ## License
 
-See [LICENSE](LICENSE).
+[MIT License](LICENSE)
