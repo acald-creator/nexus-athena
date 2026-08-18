@@ -2,13 +2,13 @@
 # run-athena-profile.sh — Start an Athena runtime profile.
 #
 # Usage:
-#   ./scripts/run-athena-profile.sh standard      # Basic red-team (default)
-#   ./scripts/run-athena-profile.sh packet-lab    # Packet capture capabilities
-#   ./scripts/run-athena-profile.sh exploit-lab   # Full exploit capabilities
-#   ./scripts/run-athena-profile.sh agent         # LLM-driven OPAR mode
-#   ./scripts/run-athena-profile.sh agent-ics     # LLM agent + ICS capabilities
-#   ./scripts/run-athena-profile.sh down          # Tear down all profiles
-#   ./scripts/run-athena-profile.sh status        # Show running containers
+#   ./scripts/run-athena-profile.sh standard          # Basic red-team (default)
+#   ./scripts/run-athena-profile.sh packet-lab        # Packet capture capabilities
+#   ./scripts/run-athena-profile.sh exploit-lab       # Full exploit capabilities
+#   ./scripts/run-athena-profile.sh agent <target>    # LLM-driven OPAR mode
+#   ./scripts/run-athena-profile.sh agent-ics <target> # LLM agent + ICS capabilities
+#   ./scripts/run-athena-profile.sh down              # Tear down all profiles
+#   ./scripts/run-athena-profile.sh status            # Show running containers
 
 set -euo pipefail
 
@@ -38,14 +38,33 @@ case "${PROFILE}" in
     docker compose --profile exploit-lab -f "${COMPOSE_FILE}" up -d athena.exploit-lab
     ;;
   agent)
+    TARGET="${2:-${ATHENA_TARGET:-}}"
+    export ATHENA_TARGET="${TARGET}"
+    if [[ -z "${ATHENA_TARGET}" ]]; then
+      echo "Usage: $0 agent <target>" >&2
+      echo "  Available targets:" >&2
+      ls config/targets/*.toml 2>/dev/null | sed 's|config/targets/||;s|\.toml||;s|^|    |' >&2
+      exit 1
+    fi
     echo "Starting Athena agent profile (LLM OPAR mode)..."
-    echo "  OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}"
+    echo "  Target:      ${ATHENA_TARGET}"
+    echo "  OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}"
+    echo "  Config:      ${ATHENA_CONFIG_PATH:-./config}"
     docker compose --profile agent -f "${COMPOSE_FILE}" up -d athena.agent
     ;;
   agent-ics)
+    TARGET="${2:-${ATHENA_TARGET:-}}"
+    export ATHENA_TARGET="${TARGET}"
+    if [[ -z "${ATHENA_TARGET}" ]]; then
+      echo "Usage: $0 agent-ics <target>" >&2
+      echo "  Available targets:" >&2
+      ls config/targets/*.toml 2>/dev/null | sed 's|config/targets/||;s|\.toml||;s|^|    |' >&2
+      exit 1
+    fi
     echo "Starting Athena agent-ics profile (LLM OPAR + ICS_WRITE + CAN_INJECT)..."
-    echo "  OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}"
-    echo "  ATHENA_CAPABILITIES=ICS_WRITE,CAN_INJECT"
+    echo "  Target:         ${ATHENA_TARGET}"
+    echo "  OLLAMA_HOST:    ${OLLAMA_HOST:-http://host.docker.internal:11434}"
+    echo "  Capabilities:   ICS_WRITE, CAN_INJECT"
     docker compose --profile agent-ics -f "${COMPOSE_FILE}" up -d athena.agent-ics
     ;;
   down)
@@ -58,7 +77,7 @@ case "${PROFILE}" in
       -f "${COMPOSE_FILE}" ps
     ;;
   *)
-    echo "Usage: $0 {standard|packet-lab|exploit-lab|agent|agent-ics|down|status}" >&2
+    echo "Usage: $0 {standard|packet-lab|exploit-lab|agent <target>|agent-ics <target>|down|status}" >&2
     exit 1
     ;;
 esac
