@@ -1,0 +1,51 @@
+# Athena Tool Registry
+# Defines available tools for the OPAR agent loop.
+# Each tool declares its binary, argument schema, and required capabilities.
+
+[tools.nmap-scan]
+binary = "nmap"
+args = ["-sV", "--open", "{target}"]
+capabilities_required = []
+description = "Service version scan against target"
+
+[tools.http-request]
+binary = "curl"
+args = ["-s", "-o", "/dev/null", "-w", "%{http_code}", "{url}"]
+capabilities_required = []
+description = "HTTP request to a URL"
+
+[tools.modbus-read]
+binary = "athena-modbus"
+args = ["--action", "read", "--target", "{target}", "--unit-id", "{unit_id}", "--address", "{address}", "--quantity", "{quantity}"]
+capabilities_required = []
+description = "Read Modbus TCP registers"
+
+[tools.modbus-write]
+binary = "athena-modbus"
+args = ["--action", "write", "--target", "{target}", "--unit-id", "{unit_id}", "--address", "{address}", "--value", "{value}"]
+capabilities_required = ["ICS_WRITE"]
+description = "Write to Modbus TCP register (requires ICS_WRITE capability)"
+
+[tools.modbus-enumerate]
+binary = "athena-modbus"
+args = ["--action", "enumerate", "--target", "{target}"]
+capabilities_required = []
+description = "Enumerate responding Modbus unit IDs"
+
+[tools.canbus-inject]
+binary = "athena-canbus"
+args = ["--action", "inject", "--interface", "{interface}", "--id", "{id}", "--data", "{data}"]
+capabilities_required = ["CAN_INJECT"]
+description = "Inject a CAN frame (requires CAN_INJECT capability)"
+
+[tools.canbus-sniff]
+binary = "athena-canbus"
+args = ["--action", "sniff", "--interface", "{interface}", "--duration-ms", "{duration}"]
+capabilities_required = []
+description = "Sniff CAN bus traffic"
+
+[tools.tcpdump-capture]
+binary = "tcpdump"
+args = ["-i", "{interface}", "-c", "{count}", "-w", "/tmp/capture.pcap"]
+capabilities_required = ["NET_RAW"]
+description = "Packet capture (requires NET_RAW capability)"

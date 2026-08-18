@@ -1,0 +1,30 @@
+# Target: OpenPLC Modbus TCP
+target_id = "openplc"
+host = "openplc.ics-lab"
+port = 502
+protocol = "ModbusTcp"
+ics_rate_limit = 10
+
+[scenario]
+objective = "Enumerate registers and validate safe-range boundary enforcement"
+techniques = ["T0801", "T0855"]
+max_actions = 30
+
+[[safe_ranges]]
+register_address = 40
+min_value = 0
+max_value = 400
+
+[[safe_ranges]]
+register_address = 10
+min_value = 0
+max_value = 300
+
+[[safe_ranges]]
+register_address = 50
+min_value = 0
+max_value = 100
+
+[labels]
+scenario_family = "ics-modbus-assessment"
+difficulty = "intermediate"

@@ -1,0 +1,16 @@
+# LLM backend configuration for OPAR agent planning phase.
+
+[backend]
+type = "ollama"
+model = "llama3:8b"
+url = "http://localhost:11434"
+
+# Overridden at runtime by OLLAMA_HOST env var when running in container.
+
+[planning]
+max_tokens = 2048
+temperature = 0.7
+
+[rate_limit]
+actions_per_minute = 30
+burst_size = 5

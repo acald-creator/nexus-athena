@@ -1,0 +1,14 @@
+# Target: OWASP Juice Shop
+target_id = "juice-shop"
+host = "juice-shop.lab"
+port = 3000
+protocol = "http"
+
+[scenario]
+objective = "Identify and exploit web application vulnerabilities"
+techniques = ["T1190", "T1005", "T1078"]
+max_actions = 50
+
+[labels]
+scenario_family = "web-app-pentest"
+difficulty = "beginner"
