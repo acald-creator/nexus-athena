@@ -73,7 +73,7 @@ services:
       - ATHENA_SCENARIO_LABEL=${ATHENA_SCENARIO_LABEL:-}
       - ATHENA_GT_OUTPUT=/opt/athena/output/ground-truth.jsonl
     volumes:
-      - ${ATHENA_CONFIG_PATH:-./config}:/opt/athena/config:ro
+      - ${ATHENA_CONFIG_PATH:-../../config}:/opt/athena/config:ro
       - athena_output:/opt/athena/output
     networks:
       - athena_lab
@@ -105,7 +105,7 @@ services:
       - ATHENA_GT_OUTPUT=/opt/athena/output/ground-truth.jsonl
       - ATHENA_CAPABILITIES=ICS_WRITE,CAN_INJECT
     volumes:
-      - ${ATHENA_CONFIG_PATH:-./config}:/opt/athena/config:ro
+      - ${ATHENA_CONFIG_PATH:-../../config}:/opt/athena/config:ro
       - athena_output:/opt/athena/output
     networks:
       - athena_lab
