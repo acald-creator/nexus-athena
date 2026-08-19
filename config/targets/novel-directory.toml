@@ -1,0 +1,74 @@
+# Target: Novel Directory Platform
+# A Go (chi) + SvelteKit + Postgres web application for authors
+# to publish content behind a paywall. JWT + Google OAuth auth.
+target_id = "novel-directory"
+host = "host.docker.internal"
+port = 8090
+protocol = "http"
+
+[scenario]
+objective = "Identify authentication, authorization, and business logic vulnerabilities in the novel platform API"
+techniques = ["T1190", "T1078", "T1110", "T1059", "T1005"]
+max_actions = 100
+
+[api]
+base_path = "/api/v1"
+auth_endpoints = [
+  "POST /auth/register",
+  "POST /auth/login",
+  "GET /auth/google",
+  "GET /auth/google/callback",
+]
+public_endpoints = [
+  "GET /novels",
+  "GET /novels/{id}",
+  "GET /novels/{id}/chapters/{num}",
+  "GET /search",
+  "GET /home",
+  "GET /genres",
+  "GET /health",
+]
+authenticated_endpoints = [
+  "GET /me",
+  "GET /progress/{novelId}",
+  "PUT /progress/{novelId}",
+]
+author_endpoints = [
+  "GET /author/novels",
+  "POST /author/novels",
+  "PUT /author/novels/{id}",
+  "DELETE /author/novels/{id}",
+  "POST /author/novels/{id}/cover",
+  "GET /author/novels/{id}/chapters",
+  "POST /author/novels/{id}/chapters",
+  "PUT /author/novels/{id}/chapters/{chapterId}",
+  "DELETE /author/novels/{id}/chapters/{chapterId}",
+  "POST /author/novels/{id}/chapters/{chapterId}/publish",
+  "POST /author/novels/{id}/chapters/{chapterId}/unpublish",
+  "POST /author/novels/{id}/chapters/{chapterId}/reorder",
+  "POST /author/novels/{id}/chapters/{chapterId}/upload",
+]
+
+[attack_vectors]
+# Authentication testing
+auth_bypass = true        # Test JWT manipulation, expired tokens, forged tokens
+credential_stuffing = false  # Rate-limited, not useful
+oauth_flow = true         # Test Google OAuth redirect manipulation
+
+# Authorization testing (IDOR)
+idor = true               # Access other authors novels/chapters
+privilege_escalation = true  # Reader accessing author endpoints
+
+# Input validation
+sqli = true               # Test all input parameters
+xss = true                # Test stored XSS in novel/chapter content
+path_traversal = true     # File upload endpoints (cover, chapter upload)
+
+# Business logic
+paywall_bypass = true     # Access paywalled chapters without payment
+rate_limiting = true      # Test rate limit on auth endpoints
+
+[labels]
+scenario_family = "web-app-pentest"
+difficulty = "intermediate"
+platform = "novel-directory"

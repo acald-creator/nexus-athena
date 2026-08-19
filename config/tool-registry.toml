@@ -49,3 +49,39 @@ binary = "tcpdump"
 args = ["-i", "{interface}", "-c", "{count}", "-w", "/tmp/capture.pcap"]
 capabilities_required = ["NET_RAW"]
 description = "Packet capture (requires NET_RAW capability)"
+
+[tools.http-get]
+binary = "curl"
+args = ["-s", "-w", "\n%{http_code}", "-H", "Authorization: Bearer {token}", "{url}"]
+capabilities_required = []
+description = "Authenticated HTTP GET request"
+
+[tools.http-post-json]
+binary = "curl"
+args = ["-s", "-X", "POST", "-H", "Content-Type: application/json", "-H", "Authorization: Bearer {token}", "-d", "{body}", "{url}"]
+capabilities_required = []
+description = "Authenticated HTTP POST with JSON body"
+
+[tools.http-put-json]
+binary = "curl"
+args = ["-s", "-X", "PUT", "-H", "Content-Type: application/json", "-H", "Authorization: Bearer {token}", "-d", "{body}", "{url}"]
+capabilities_required = []
+description = "Authenticated HTTP PUT with JSON body"
+
+[tools.http-delete]
+binary = "curl"
+args = ["-s", "-X", "DELETE", "-H", "Authorization: Bearer {token}", "{url}"]
+capabilities_required = []
+description = "Authenticated HTTP DELETE request"
+
+[tools.register-user]
+binary = "curl"
+args = ["-s", "-X", "POST", "-H", "Content-Type: application/json", "-d", "{body}", "{base_url}/api/v1/auth/register"]
+capabilities_required = []
+description = "Register a new user account"
+
+[tools.login-user]
+binary = "curl"
+args = ["-s", "-X", "POST", "-H", "Content-Type: application/json", "-d", "{body}", "{base_url}/api/v1/auth/login"]
+capabilities_required = []
+description = "Login and obtain JWT token"

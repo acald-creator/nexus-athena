@@ -38,5 +38,15 @@
     "protocols": [
       "modbus"
     ]
+  },
+  {
+    "host": "host.docker.internal",
+    "ports": [
+      8090
+    ],
+    "description": "Novel Directory Platform (Go API)",
+    "protocols": [
+      "http"
+    ]
   }
 ]
