@@ -1,52 +1,47 @@
 [
   {
     "host": "juice-shop.lab",
-    "ports": [
+    "port_range": [
+      3000,
       3000
     ],
-    "description": "OWASP Juice Shop (web app testing)",
-    "protocols": [
-      "http"
-    ]
+    "protocol": "http",
+    "label": "juice-shop-lab"
   },
   {
     "host": "dvwa.lab",
-    "ports": [
+    "port_range": [
+      80,
       80
     ],
-    "description": "Damn Vulnerable Web Application",
-    "protocols": [
-      "http"
-    ]
+    "protocol": "http",
+    "label": "dvwa-lab"
   },
   {
     "host": "openplc.ics-lab",
-    "ports": [
+    "port_range": [
+      502,
       502
     ],
-    "description": "OpenPLC Modbus TCP simulator",
-    "protocols": [
-      "modbus"
-    ]
+    "protocol": "modbus",
+    "label": "openplc-ics-lab"
   },
   {
     "host": "grfics.ics-lab",
-    "ports": [
+    "port_range": [
+      502,
       502
     ],
-    "description": "GRFICSv2 ICS process simulator",
-    "protocols": [
-      "modbus"
-    ]
+    "protocol": "modbus",
+    "label": "grfics-ics-lab"
   },
   {
-    "host": "host.docker.internal",
-    "ports": [
+    "host": "localhost",
+    "port_range": [
+      8090,
       8090
     ],
-    "description": "Novel Directory Platform (Go API)",
-    "protocols": [
-      "http"
-    ]
+    "protocol": "http",
+    "label": "novel-directory"
   }
 ]

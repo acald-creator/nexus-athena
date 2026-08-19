@@ -1,87 +1,138 @@
 # Athena Tool Registry
-# Defines available tools for the OPAR agent loop.
-# Each tool declares its binary, argument schema, and required capabilities.
+# Format matches ToolEntry model in orchestrator/tool_registry.py
 
 [tools.nmap-scan]
-binary = "nmap"
-args = ["-sV", "--open", "{target}"]
-capabilities_required = []
+executable = "nmap"
+invocation = "subprocess"
+required_capabilities = []
 description = "Service version scan against target"
 
+[tools.nmap-scan.args]
+[tools.nmap-scan.args.target]
+type = "string"
+required = true
+
 [tools.http-request]
-binary = "curl"
-args = ["-s", "-o", "/dev/null", "-w", "%{http_code}", "{url}"]
-capabilities_required = []
+executable = "curl"
+invocation = "subprocess"
+required_capabilities = []
 description = "HTTP request to a URL"
 
+[tools.http-request.args]
+[tools.http-request.args.url]
+type = "string"
+required = true
+[tools.http-request.args.method]
+type = "string"
+required = false
+default = "GET"
+enum = ["GET", "POST", "PUT", "DELETE"]
+[tools.http-request.args.body]
+type = "string"
+required = false
+[tools.http-request.args.token]
+type = "string"
+required = false
+
 [tools.modbus-read]
-binary = "athena-modbus"
-args = ["--action", "read", "--target", "{target}", "--unit-id", "{unit_id}", "--address", "{address}", "--quantity", "{quantity}"]
-capabilities_required = []
+executable = "${ATHENA_BIN_DIR}/athena-modbus"
+invocation = "subprocess"
+required_capabilities = []
 description = "Read Modbus TCP registers"
 
-[tools.modbus-write]
-binary = "athena-modbus"
-args = ["--action", "write", "--target", "{target}", "--unit-id", "{unit_id}", "--address", "{address}", "--value", "{value}"]
-capabilities_required = ["ICS_WRITE"]
-description = "Write to Modbus TCP register (requires ICS_WRITE capability)"
+[tools.modbus-read.args]
+[tools.modbus-read.args.target]
+type = "string"
+required = true
+[tools.modbus-read.args.unit_id]
+type = "integer"
+required = true
+min = 1
+max = 247
+[tools.modbus-read.args.address]
+type = "integer"
+required = true
+min = 0
+max = 65535
+[tools.modbus-read.args.quantity]
+type = "integer"
+required = false
+default = 1
 
-[tools.modbus-enumerate]
-binary = "athena-modbus"
-args = ["--action", "enumerate", "--target", "{target}"]
-capabilities_required = []
-description = "Enumerate responding Modbus unit IDs"
+[tools.modbus-write]
+executable = "${ATHENA_BIN_DIR}/athena-modbus"
+invocation = "subprocess"
+required_capabilities = ["ICS_WRITE"]
+description = "Write to Modbus TCP register (requires ICS_WRITE)"
+
+[tools.modbus-write.args]
+[tools.modbus-write.args.target]
+type = "string"
+required = true
+[tools.modbus-write.args.unit_id]
+type = "integer"
+required = true
+min = 1
+max = 247
+[tools.modbus-write.args.address]
+type = "integer"
+required = true
+min = 0
+max = 65535
+[tools.modbus-write.args.value]
+type = "integer"
+required = true
 
 [tools.canbus-inject]
-binary = "athena-canbus"
-args = ["--action", "inject", "--interface", "{interface}", "--id", "{id}", "--data", "{data}"]
-capabilities_required = ["CAN_INJECT"]
-description = "Inject a CAN frame (requires CAN_INJECT capability)"
+executable = "${ATHENA_BIN_DIR}/athena-canbus"
+invocation = "subprocess"
+required_capabilities = ["CAN_INJECT"]
+description = "Inject a CAN frame (requires CAN_INJECT)"
 
-[tools.canbus-sniff]
-binary = "athena-canbus"
-args = ["--action", "sniff", "--interface", "{interface}", "--duration-ms", "{duration}"]
-capabilities_required = []
-description = "Sniff CAN bus traffic"
-
-[tools.tcpdump-capture]
-binary = "tcpdump"
-args = ["-i", "{interface}", "-c", "{count}", "-w", "/tmp/capture.pcap"]
-capabilities_required = ["NET_RAW"]
-description = "Packet capture (requires NET_RAW capability)"
-
-[tools.http-get]
-binary = "curl"
-args = ["-s", "-w", "\n%{http_code}", "-H", "Authorization: Bearer {token}", "{url}"]
-capabilities_required = []
-description = "Authenticated HTTP GET request"
-
-[tools.http-post-json]
-binary = "curl"
-args = ["-s", "-X", "POST", "-H", "Content-Type: application/json", "-H", "Authorization: Bearer {token}", "-d", "{body}", "{url}"]
-capabilities_required = []
-description = "Authenticated HTTP POST with JSON body"
-
-[tools.http-put-json]
-binary = "curl"
-args = ["-s", "-X", "PUT", "-H", "Content-Type: application/json", "-H", "Authorization: Bearer {token}", "-d", "{body}", "{url}"]
-capabilities_required = []
-description = "Authenticated HTTP PUT with JSON body"
-
-[tools.http-delete]
-binary = "curl"
-args = ["-s", "-X", "DELETE", "-H", "Authorization: Bearer {token}", "{url}"]
-capabilities_required = []
-description = "Authenticated HTTP DELETE request"
+[tools.canbus-inject.args]
+[tools.canbus-inject.args.interface]
+type = "string"
+required = true
+[tools.canbus-inject.args.id]
+type = "string"
+required = true
+[tools.canbus-inject.args.data]
+type = "string"
+required = true
 
 [tools.register-user]
-binary = "curl"
-args = ["-s", "-X", "POST", "-H", "Content-Type: application/json", "-d", "{body}", "{base_url}/api/v1/auth/register"]
-capabilities_required = []
-description = "Register a new user account"
+executable = "curl"
+invocation = "subprocess"
+required_capabilities = []
+description = "Register a new user account on the target"
+
+[tools.register-user.args]
+[tools.register-user.args.base_url]
+type = "string"
+required = true
+[tools.register-user.args.username]
+type = "string"
+required = true
+[tools.register-user.args.email]
+type = "string"
+required = true
+[tools.register-user.args.password]
+type = "string"
+required = true
 
 [tools.login-user]
-binary = "curl"
-args = ["-s", "-X", "POST", "-H", "Content-Type: application/json", "-d", "{body}", "{base_url}/api/v1/auth/login"]
-capabilities_required = []
+executable = "curl"
+invocation = "subprocess"
+required_capabilities = []
 description = "Login and obtain JWT token"
+
+[tools.login-user.args]
+[tools.login-user.args.base_url]
+type = "string"
+required = true
+[tools.login-user.args.email]
+type = "string"
+required = true
+[tools.login-user.args.password]
+type = "string"
+required = true

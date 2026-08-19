@@ -2,7 +2,7 @@
 # A Go (chi) + SvelteKit + Postgres web application for authors
 # to publish content behind a paywall. JWT + Google OAuth auth.
 target_id = "novel-directory"
-host = "host.docker.internal"
+host = "localhost"
 port = 8090
 protocol = "http"
 
