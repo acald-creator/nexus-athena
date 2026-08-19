@@ -114,6 +114,19 @@ services:
     profiles:
       - agent-ics
 
+
+  # ─── Lab Targets ─────────────────────────────────────────────────────
+  juice-shop:
+    image: bkimminich/juice-shop:latest
+    container_name: juice-shop.lab
+    hostname: juice-shop.lab
+    ports:
+      - "3001:3000"
+    networks:
+      - athena_lab
+    profiles:
+      - targets
+
 networks:
   athena_lab:
     driver: bridge

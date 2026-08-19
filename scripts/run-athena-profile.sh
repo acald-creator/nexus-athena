@@ -69,19 +69,24 @@ case "${PROFILE}" in
     ;;
   down)
     echo "Tearing down all Athena profiles..."
-    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics \
+    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets \
       -f "${COMPOSE_FILE}" down
     ;;
   status)
-    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics \
+    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets \
       -f "${COMPOSE_FILE}" ps
     ;;
+  targets)
+    echo "Starting lab targets (Juice Shop)..."
+    docker compose --profile targets -f "${COMPOSE_FILE}" up -d juice-shop
+    echo "Juice Shop at http://localhost:3001"
+    ;;
   *)
-    echo "Usage: $0 {standard|packet-lab|exploit-lab|agent <target>|agent-ics <target>|down|status}" >&2
+    echo "Usage: $0 {standard|packet-lab|exploit-lab|agent <target>|agent-ics <target>|targets|down|status}" >&2
     exit 1
     ;;
 esac
 
 echo ""
-docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics \
+docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets \
   -f "${COMPOSE_FILE}" ps 2>/dev/null || true

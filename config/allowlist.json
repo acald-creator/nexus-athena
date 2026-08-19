@@ -1,26 +1,42 @@
 [
   {
     "host": "juice-shop.lab",
-    "ports": [3000],
+    "ports": [
+      3000
+    ],
     "description": "OWASP Juice Shop (web app testing)",
-    "protocols": ["http"]
+    "protocols": [
+      "http"
+    ]
   },
   {
     "host": "dvwa.lab",
-    "ports": [80],
+    "ports": [
+      80
+    ],
     "description": "Damn Vulnerable Web Application",
-    "protocols": ["http"]
+    "protocols": [
+      "http"
+    ]
   },
   {
     "host": "openplc.ics-lab",
-    "ports": [502],
+    "ports": [
+      502
+    ],
     "description": "OpenPLC Modbus TCP simulator",
-    "protocols": ["modbus"]
+    "protocols": [
+      "modbus"
+    ]
   },
   {
     "host": "grfics.ics-lab",
-    "ports": [502],
+    "ports": [
+      502
+    ],
     "description": "GRFICSv2 ICS process simulator",
-    "protocols": ["modbus"]
+    "protocols": [
+      "modbus"
+    ]
   }
 ]
