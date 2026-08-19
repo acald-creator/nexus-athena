@@ -127,10 +127,45 @@ services:
     profiles:
       - targets
 
+  # --- SOC Detection (runs on athena_lab to see agent traffic) ---
+  suricata.sensor:
+    image: jasonish/suricata:7.0
+    container_name: athena-suricata
+    hostname: suricata.sensor
+    command: ["-i", "eth0", "-c", "/etc/suricata/suricata.yaml"]
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ../../suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
+      - suricata_logs:/var/log/suricata
+    networks:
+      - athena_lab
+    restart: unless-stopped
+    profiles:
+      - detection
+
+  suricata.forwarder:
+    image: busybox:1.36
+    container_name: athena-suricata-forwarder
+    depends_on:
+      - suricata.sensor
+    command: ["/bin/sh", "-c", "touch /var/log/suricata/eve.json && tail -F /var/log/suricata/eve.json"]
+    volumes:
+      - suricata_logs:/var/log/suricata:ro
+    networks:
+      - athena_lab
+    restart: unless-stopped
+    profiles:
+      - detection
+
+
 networks:
   athena_lab:
     driver: bridge
 
 volumes:
   athena_output:
+    driver: local
+  suricata_logs:
     driver: local

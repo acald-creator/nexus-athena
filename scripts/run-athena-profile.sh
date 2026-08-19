@@ -67,13 +67,19 @@ case "${PROFILE}" in
     echo "  Capabilities:   ICS_WRITE, CAN_INJECT"
     docker compose --profile agent-ics -f "${COMPOSE_FILE}" up -d athena.agent-ics
     ;;
+  detection)
+    echo "Starting Suricata detection on athena_lab network..."
+    docker compose --profile detection -f "${COMPOSE_FILE}" up -d suricata.sensor suricata.forwarder
+    echo "Suricata capturing on athena_lab. Logs in suricata_logs volume."
+    echo "View alerts: docker logs athena-suricata-forwarder"
+    ;;
   down)
     echo "Tearing down all Athena profiles..."
-    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets \
+    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets --profile detection \
       -f "${COMPOSE_FILE}" down
     ;;
   status)
-    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets \
+    docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets --profile detection \
       -f "${COMPOSE_FILE}" ps
     ;;
   targets)
@@ -82,11 +88,11 @@ case "${PROFILE}" in
     echo "Juice Shop at http://localhost:3001"
     ;;
   *)
-    echo "Usage: $0 {standard|packet-lab|exploit-lab|agent <target>|agent-ics <target>|targets|down|status}" >&2
+    echo "Usage: $0 {standard|packet-lab|exploit-lab|agent <target>|agent-ics <target>|targets|detection|down|status}" >&2
     exit 1
     ;;
 esac
 
 echo ""
-docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets \
+docker compose --profile packet-lab --profile exploit-lab --profile agent --profile agent-ics --profile targets --profile detection \
   -f "${COMPOSE_FILE}" ps 2>/dev/null || true

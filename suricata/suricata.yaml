@@ -1,0 +1,50 @@
+%YAML 1.1
+---
+vars:
+  address-groups:
+    HOME_NET: "[10.0.0.0/8,172.16.0.0/12,192.168.0.0/16]"
+    EXTERNAL_NET: "!$HOME_NET"
+  port-groups:
+    HTTP_PORTS: "[80,3000,8080,8090]"
+    SSH_PORTS: 22
+
+default-log-dir: /var/log/suricata
+
+af-packet:
+  - interface: eth0
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+
+outputs:
+  - fast:
+      enabled: yes
+      filename: fast.log
+      append: yes
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      community-id: true
+      types:
+        - alert:
+            metadata: yes
+            http-headers: yes
+        - http:
+            extended: yes
+        - dns
+        - tls
+        - flow
+
+detect-engine:
+  - profile: medium
+
+# Default rule files
+default-rule-path: /var/lib/suricata/rules
+
+rule-files:
+  - suricata.rules
+
+# Athena-specific: also load custom rules if present
+# rule-files:
+#   - /etc/suricata/rules/athena-custom.rules
