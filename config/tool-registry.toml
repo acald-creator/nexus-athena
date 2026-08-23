@@ -13,26 +13,32 @@ type = "string"
 required = true
 
 [tools.http-request]
-executable = "curl"
-invocation = "subprocess"
+module = "orchestrator.tools.http_request"
+invocation = "in-process"
 required_capabilities = []
-description = "HTTP request to a URL"
+description = "GET an allowlisted HTTP path (labeled traffic, no request body)"
 
 [tools.http-request.args]
 [tools.http-request.args.url]
 type = "string"
+required = false
+[tools.http-request.args.target]
+type = "string"
 required = true
+[tools.http-request.args.port]
+type = "integer"
+required = true
+min = 1
+max = 65535
+[tools.http-request.args.path]
+type = "string"
+required = false
+default = "/"
 [tools.http-request.args.method]
 type = "string"
 required = false
 default = "GET"
-enum = ["GET", "POST", "PUT", "DELETE"]
-[tools.http-request.args.body]
-type = "string"
-required = false
-[tools.http-request.args.token]
-type = "string"
-required = false
+enum = ["GET"]
 
 [tools.modbus-read]
 executable = "${ATHENA_BIN_DIR}/athena-modbus"

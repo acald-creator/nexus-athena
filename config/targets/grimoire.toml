@@ -1,0 +1,28 @@
+# Target: Grimoire (host-side workbench API)
+# Authorized assessment of the local grimoire-web process in grimoire-workbench.
+#
+# Host cargo:  cargo run -p grimoire-web  →  127.0.0.1:3010
+# Do not use host "localhost" — that identity is already claimed by novel-directory :8090.
+# Compose-joined runs use targets/grimoire-lab.toml (grimoire.lab:3000).
+target_id = "grimoire"
+host = "127.0.0.1"
+port = 3010
+protocol = "http"
+
+[scenario]
+objective = "Map the local Grimoire writing-assistant API and confirm allowlist identity before any further actions"
+techniques = ["T1595", "T1190"]
+max_actions = 8
+
+[api]
+base_path = "/api"
+public_endpoints = [
+  "GET /health",
+  "GET /auth/status",
+]
+
+[labels]
+scenario_family = "web-app-pentest"
+difficulty = "beginner"
+platform = "grimoire-workbench"
+execution_context = "host"

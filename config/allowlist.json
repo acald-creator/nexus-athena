@@ -43,5 +43,23 @@
     ],
     "protocol": "http",
     "label": "novel-directory"
+  },
+  {
+    "host": "127.0.0.1",
+    "port_range": [
+      3010,
+      3010
+    ],
+    "protocol": "http",
+    "label": "grimoire-host"
+  },
+  {
+    "host": "grimoire.lab",
+    "port_range": [
+      3000,
+      3000
+    ],
+    "protocol": "http",
+    "label": "grimoire-lab"
   }
 ]

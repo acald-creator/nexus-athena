@@ -86,6 +86,8 @@ case "${PROFILE}" in
     echo "Starting lab targets (Juice Shop)..."
     docker compose --profile targets -f "${COMPOSE_FILE}" up -d juice-shop
     echo "Juice Shop at http://localhost:3001"
+    echo "Grimoire is not started here. Host: cargo run -p grimoire-web (target grimoire)."
+    echo "Compose: in grimoire-workbench, docker compose -f docker-compose.yml -f docker-compose.athena.yml up -d web (target grimoire-lab)."
     ;;
   *)
     echo "Usage: $0 {standard|packet-lab|exploit-lab|agent <target>|agent-ics <target>|targets|detection|down|status}" >&2
