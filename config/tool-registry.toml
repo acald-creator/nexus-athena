@@ -40,6 +40,28 @@ required = false
 default = "GET"
 enum = ["GET"]
 
+[tools.http-post-probe]
+module = "orchestrator.tools.http_post_probe"
+invocation = "in-process"
+required_capabilities = []
+description = "POST JSON to allowlisted auth paths (labeled traffic, path-gated)"
+
+[tools.http-post-probe.args]
+[tools.http-post-probe.args.target]
+type = "string"
+required = true
+[tools.http-post-probe.args.port]
+type = "integer"
+required = true
+min = 1
+max = 65535
+[tools.http-post-probe.args.path]
+type = "string"
+required = true
+[tools.http-post-probe.args.body]
+type = "object"
+required = true
+
 [tools.modbus-read]
 executable = "${ATHENA_BIN_DIR}/athena-modbus"
 invocation = "subprocess"

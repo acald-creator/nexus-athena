@@ -127,6 +127,9 @@ services:
     profiles:
       - targets
 
+  # Night Quire host API (SSH tunnel or local docker-compose on host :8090)
+  # Athena container reaches via host.docker.internal — allowlisted in config/allowlist.json
+
   # --- SOC Detection (runs on athena_lab to see agent traffic) ---
   suricata.sensor:
     image: jasonish/suricata:7.0
