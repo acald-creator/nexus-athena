@@ -109,7 +109,7 @@ required = true
 [tools.register-user]
 executable = "curl"
 invocation = "subprocess"
-required_capabilities = []
+required_capabilities = ["SESSION_LOGIN"]
 description = "Register a new user account on the target"
 
 [tools.register-user.args]
@@ -129,7 +129,7 @@ required = true
 [tools.login-user]
 executable = "curl"
 invocation = "subprocess"
-required_capabilities = []
+required_capabilities = ["SESSION_LOGIN"]
 description = "Login and obtain JWT token"
 
 [tools.login-user.args]

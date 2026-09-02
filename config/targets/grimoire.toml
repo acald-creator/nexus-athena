@@ -1,24 +1,25 @@
-# Target: Grimoire (host-side workbench API)
-# Authorized assessment of the local grimoire-web process in grimoire-workbench.
+# Target: Grimoire (host-side UI)
+# The live surface is the SvelteKit UI. It proxies /api to cargo on 127.0.0.1:3010.
+# Auth is enabled in the operator's gitignored local config — do not store passwords here.
 #
-# Host cargo:  cargo run -p grimoire-web  →  127.0.0.1:3010
 # Do not use host "localhost" — that identity is already claimed by novel-directory :8090.
-# Compose-joined runs use targets/grimoire-lab.toml (grimoire.lab:3000).
+# Compose-joined API runs use targets/grimoire-lab.toml (grimoire.lab:3000).
 target_id = "grimoire"
 host = "127.0.0.1"
-port = 3010
+port = 4400
 protocol = "http"
 
 [scenario]
-objective = "Map the local Grimoire writing-assistant API and confirm allowlist identity before any further actions"
+objective = "Map the local Grimoire UI at / and the proxied public API paths. Do not invent login or register tools."
 techniques = ["T1595", "T1190"]
 max_actions = 8
 
 [api]
 base_path = "/api"
 public_endpoints = [
-  "GET /health",
-  "GET /auth/status",
+  "GET /",
+  "GET /api/health",
+  "GET /api/auth/status",
 ]
 
 [labels]

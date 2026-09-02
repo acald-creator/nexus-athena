@@ -36,19 +36,28 @@
     "label": "grfics-ics-lab"
   },
   {
-    "host": "localhost",
+    "host": "127.0.0.1",
     "port_range": [
       8090,
       8090
     ],
     "protocol": "http",
-    "label": "novel-directory"
+    "label": "night-quire-api"
   },
   {
     "host": "127.0.0.1",
     "port_range": [
-      3010,
-      3010
+      5173,
+      5173
+    ],
+    "protocol": "http",
+    "label": "night-quire-web"
+  },
+  {
+    "host": "127.0.0.1",
+    "port_range": [
+      4400,
+      4400
     ],
     "protocol": "http",
     "label": "grimoire-host"

@@ -25,7 +25,7 @@ Two identities — pick one and keep it everywhere (target TOML, allowlist, plan
 
 | Target | Host:port | When |
 |--------|-----------|------|
-| `grimoire` | `127.0.0.1:3010` | Host orchestrator + `cargo run -p grimoire-web` |
+| `grimoire` | `127.0.0.1:4400` | Host orchestrator + SvelteKit UI (proxies `/api` to cargo `:3010`) |
 | `grimoire-lab` | `grimoire.lab:3000` | `athena.agent` + workbench `docker-compose.athena.yml` |
 
 Do not add a `localhost` row for Grimoire. `localhost` is already novel-directory `:8090`; first-match wins.

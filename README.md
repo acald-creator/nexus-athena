@@ -86,7 +86,7 @@ config/
 ├── llm.toml                # LLM backend settings (Ollama/vLLM)
 └── targets/
     ├── juice-shop.toml     # Web app pentest scenario
-    ├── grimoire.toml       # Grimoire workbench API (host :3010)
+    ├── grimoire.toml       # Grimoire workbench UI (host :4400)
     ├── grimoire-lab.toml   # Grimoire on athena_lab (grimoire.lab:3000)
     └── openplc.toml        # ICS Modbus with safe ranges
 ```
